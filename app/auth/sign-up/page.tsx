@@ -45,19 +45,7 @@ export default function SignUpPage() {
       })
       if (error) throw error
 
-      // Create admin user profile
-      if (data.user) {
-        const { error: profileError } = await supabase.from("admin_users").insert({
-          id: data.user.id,
-          email: data.user.email!,
-          full_name: fullName,
-        })
-
-        if (profileError) {
-          console.error("Profile creation error:", profileError)
-          // Don't throw error here as the user account was created successfully
-        }
-      }
+      // The database trigger will automatically create the admin_users record
 
       router.push("/auth/sign-up-success")
     } catch (error: unknown) {

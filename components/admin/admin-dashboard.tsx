@@ -9,7 +9,8 @@ import { ResultsManager } from "./results-manager"
 import { GalleryManager } from "./gallery-manager"
 import { ContactMessages } from "./contact-messages"
 import { SiteSettings } from "./site-settings"
-import { BookOpen, Play, Trophy, ImageIcon, MessageSquare, Settings, LogOut } from "lucide-react"
+import { StudentRegistrations } from "./student-registrations"
+import { BookOpen, Play, Trophy, ImageIcon, MessageSquare, Settings, LogOut, Users } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
@@ -41,7 +42,7 @@ export function AdminDashboard() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-card">
+          <TabsList className="grid w-full grid-cols-7 bg-card">
             <TabsTrigger value="classes" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Classes
@@ -57,6 +58,10 @@ export function AdminDashboard() {
             <TabsTrigger value="gallery" className="flex items-center gap-2">
               <ImageIcon className="h-4 w-4" />
               Gallery
+            </TabsTrigger>
+            <TabsTrigger value="students" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Students
             </TabsTrigger>
             <TabsTrigger value="messages" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
@@ -82,6 +87,10 @@ export function AdminDashboard() {
 
           <TabsContent value="gallery">
             <GalleryManager />
+          </TabsContent>
+
+          <TabsContent value="students">
+            <StudentRegistrations />
           </TabsContent>
 
           <TabsContent value="messages">

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { ChevronDown, ChevronUp, FileText, Play, CreditCard, Download } from "lucide-react"
-import "./globals.css";
+import Link from "next/link"
 
 interface ClassData {
   id: string
@@ -59,47 +59,68 @@ export default function ClassPage() {
 
   useEffect(() => {
     async function fetchClassData() {
-      const supabase = createClient()
+      try {
+        const supabase = createClient()
+        console.log("Fetching class data for:", classId)
 
-      // Fetch class information
-      const { data: classInfo } = await supabase
-        .from("classes")
-        .select("*")
-        .eq("name", getClassNameFromId(classId))
-        .single()
-
-      if (classInfo) {
-        setClassData(classInfo)
-
-        // Fetch months for this class
-        const { data: monthsData } = await supabase
-          .from("months")
+        // Fetch class information
+        const { data: classInfo, error: classError } = await supabase
+          .from("classes")
           .select("*")
-          .eq("class_id", classInfo.id)
-          .order("month_number", { ascending: true })
+          .eq("name", getClassNameFromId(classId))
+          .single()
 
-        if (monthsData) {
-          // Fetch videos and notes for each month
-          const monthsWithContent = await Promise.all(
-            monthsData.map(async (month) => {
-              const [videosResult, notesResult] = await Promise.all([
-                supabase.from("videos").select("*").eq("month_id", month.id).order("order_index", { ascending: true }),
-                supabase.from("notes").select("*").eq("month_id", month.id),
-              ])
-
-              return {
-                ...month,
-                videos: videosResult.data || [],
-                notes: notesResult.data || [],
-              }
-            }),
-          )
-
-          setMonths(monthsWithContent)
+        if (classError) {
+          console.error("Error fetching class:", classError)
+          setLoading(false)
+          return
         }
-      }
 
-      setLoading(false)
+        if (classInfo) {
+          console.log("Class found:", classInfo)
+          setClassData(classInfo)
+
+          // Fetch months for this class
+          const { data: monthsData, error: monthsError } = await supabase
+            .from("months")
+            .select("*")
+            .eq("class_id", classInfo.id)
+            .order("month_number", { ascending: true })
+
+          if (monthsError) {
+            console.error("Error fetching months:", monthsError)
+            setLoading(false)
+            return
+          }
+
+          if (monthsData) {
+            console.log("Months found:", monthsData.length)
+            // Fetch videos and notes for each month
+            const monthsWithContent = await Promise.all(
+              monthsData.map(async (month) => {
+                const [videosResult, notesResult] = await Promise.all([
+                  supabase.from("videos").select("*").eq("month_id", month.id).order("order_index", { ascending: true }),
+                  supabase.from("notes").select("*").eq("month_id", month.id),
+                ])
+
+                return {
+                  ...month,
+                  videos: videosResult.data || [],
+                  notes: notesResult.data || [],
+                }
+              }),
+            )
+
+            setMonths(monthsWithContent)
+          }
+        } else {
+          console.log("No class found for:", classId)
+        }
+      } catch (error) {
+        console.error("Unexpected error:", error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchClassData()
@@ -142,8 +163,15 @@ Please send payment receipt to WhatsApp after payment.`
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="pt-20 flex items-center justify-center">
-          <div className="animate-pulse text-foreground">Loading class content...</div>
+        <div className="pt-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <div className="animate-pulse text-foreground mb-4">Loading class content...</div>
+              <div className="text-sm text-muted-foreground">
+                Class ID: {classId} | Mapped to: {getClassNameFromId(classId)}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -153,10 +181,44 @@ Please send payment receipt to WhatsApp after payment.`
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="pt-20 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Class Not Found</h1>
-            <p className="text-muted-foreground">The requested class could not be found.</p>
+        <div className="pt-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-foreground mb-4">Class Not Found</h1>
+              <p className="text-muted-foreground mb-6">The requested class "{getClassNameFromId(classId)}" could not be found.</p>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">Available classes:</p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link href="/classes/2025-al">
+                    <Button variant="outline" className="border-accent text-accent hover:bg-accent/10">
+                      2025 A/L ICT
+                    </Button>
+                  </Link>
+                  <Link href="/classes/2026-al">
+                    <Button variant="outline" className="border-accent text-accent hover:bg-accent/10">
+                      2026 A/L ICT
+                    </Button>
+                  </Link>
+                  <Link href="/classes/2027-al">
+                    <Button variant="outline" className="border-accent text-accent hover:bg-accent/10">
+                      2027 A/L ICT
+                    </Button>
+                  </Link>
+                  <Link href="/classes/lesson-packs">
+                    <Button variant="outline" className="border-accent text-accent hover:bg-accent/10">
+                      Lesson Packs
+                    </Button>
+                  </Link>
+                </div>
+                <div className="mt-6">
+                  <Link href="/">
+                    <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
+                      Back to Home
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

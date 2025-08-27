@@ -12,10 +12,11 @@ export function Navigation() {
 
   const navItems = [
     { name: "Home", href: "#home" },
-    { name: "Classes", href: "#classes", hasPopup: true },
     { name: "Results", href: "#results" },
     { name: "Gallery", href: "#gallery" },
     { name: "Contact Us", href: "#contact" },
+    { name: "Classes", href: "#classes", hasPopup: true },
+
   ]
 
   const classOptions = [
@@ -78,6 +79,11 @@ export function Navigation() {
                   )}
                 </div>
               ))}
+              <Link href="/student-register">
+                <Button className="bg-accent text-accent-foreground hover:bg-accent/90 text-sm font-medium">
+                  Student Register
+                </Button>
+              </Link>
               <Button variant="ghost" size="icon" className="text-foreground hover:text-accent">
                 <Bell className="h-4 w-4" />
               </Button>
@@ -142,6 +148,13 @@ export function Navigation() {
                   )}
                 </div>
               ))}
+              <Link
+                href="/student-register"
+                className="block px-3 py-2 rounded-md text-base font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-colors text-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Student Register
+              </Link>
               <Link
                 href="/auth/login"
                 className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-accent hover:bg-accent/10 transition-colors"

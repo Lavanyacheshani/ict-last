@@ -37,10 +37,28 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Define public routes that don't require authentication
+  const publicRoutes = [
+    "/",
+    "/auth/login",
+    "/auth/sign-up",
+    "/auth/sign-up-success",
+    "/auth/error",
+    "/student-register"
+  ]
+  
+  // Define public route patterns
+  const publicRoutePatterns = [
+    /^\/classes\/.*$/, // All class pages are public
+  ]
+
+  // Check if current route is public
+  const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) ||
+    publicRoutePatterns.some(pattern => pattern.test(request.nextUrl.pathname))
+
   if (
-    request.nextUrl.pathname !== "/" &&
+    !isPublicRoute &&
     !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth")
   ) {
     // no user, potentially respond by redirecting the user to the login page
